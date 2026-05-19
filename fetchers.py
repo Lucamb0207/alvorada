@@ -1,6 +1,7 @@
 import feedparser
 import yfinance as yf
 import pandas as pd
+import requests
 from datetime import datetime, timezone
 
 # ---------------------------------------------------------------------------
@@ -116,24 +117,53 @@ def fetch_news(feeds, max_items: int = 8):
     return items[:max_items]
 
 
+def _fetch_brent_yfinance():
+    df = yf.download("BZ=F", period="35d", interval="1d", progress=False, auto_adjust=True)
+    if df.empty:
+        raise ValueError("Empty dataframe")
+    close = df["Close"]
+    if isinstance(close, pd.DataFrame):
+        close = close.iloc[:, 0]
+    close = close.dropna()
+    return close
+
+
+def _fetch_brent_requests():
+    """Fallback: fetch Brent via Yahoo Finance v8 JSON API."""
+    url = (
+        "https://query1.finance.yahoo.com/v8/finance/chart/BZ=F"
+        "?interval=1d&range=35d"
+    )
+    headers = {"User-Agent": "Mozilla/5.0"}
+    r = requests.get(url, headers=headers, timeout=10)
+    r.raise_for_status()
+    data = r.json()
+    result = data["chart"]["result"][0]
+    timestamps = result["timestamp"]
+    closes = result["indicators"]["quote"][0]["close"]
+    dates = pd.to_datetime(timestamps, unit="s", utc=True).normalize()
+    close = pd.Series(closes, index=dates, dtype=float).dropna()
+    return close
+
+
 def fetch_brent():
     """Returns (close_series, current_price, pct_change_1d)."""
-    try:
-        df = yf.download("BZ=F", period="35d", interval="1d", progress=False, auto_adjust=True)
-        if df.empty:
-            raise ValueError("Empty dataframe")
-        # yfinance >=0.2.x returns MultiIndex columns — flatten to get Close series
-        close = df["Close"]
-        if isinstance(close, pd.DataFrame):
-            close = close.iloc[:, 0]
-        close = close.dropna()
-        current = float(close.iloc[-1])
-        prev = float(close.iloc[-2]) if len(close) > 1 else current
-        pct = (current - prev) / prev * 100
-        return close, current, pct
-    except Exception as exc:
-        print(f"[fetchers] Brent error: {exc}")
-        return pd.Series(dtype=float), 0.0, 0.0
+    close = pd.Series(dtype=float)
+    for fn in (_fetch_brent_yfinance, _fetch_brent_requests):
+        try:
+            close = fn()
+            if not close.empty:
+                break
+        except Exception as exc:
+            print(f"[fetchers] Brent attempt failed ({fn.__name__}): {exc}")
+
+    if close.empty:
+        return close, 0.0, 0.0
+
+    current = float(close.iloc[-1])
+    prev = float(close.iloc[-2]) if len(close) > 1 else current
+    pct = (current - prev) / prev * 100
+    return close, current, pct
 
 
 def fetch_og_events():
