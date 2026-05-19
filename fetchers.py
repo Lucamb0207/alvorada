@@ -117,8 +117,8 @@ def fetch_news(feeds, max_items: int = 8):
     return items[:max_items]
 
 
-def _fetch_brent_yfinance():
-    df = yf.download("BZ=F", period="35d", interval="1d", progress=False, auto_adjust=True)
+def _fetch_price_yfinance(ticker: str):
+    df = yf.download(ticker, period="35d", interval="1d", progress=False, auto_adjust=True)
     if df.empty:
         raise ValueError("Empty dataframe")
     close = df["Close"]
@@ -128,12 +128,9 @@ def _fetch_brent_yfinance():
     return close
 
 
-def _fetch_brent_requests():
-    """Fallback: fetch Brent via Yahoo Finance v8 JSON API."""
-    url = (
-        "https://query1.finance.yahoo.com/v8/finance/chart/BZ=F"
-        "?interval=1d&range=35d"
-    )
+def _fetch_price_requests(ticker: str):
+    """Fallback: fetch price via Yahoo Finance v8 JSON API."""
+    url = f"https://query1.finance.yahoo.com/v8/finance/chart/{ticker}?interval=1d&range=35d"
     headers = {"User-Agent": "Mozilla/5.0"}
     r = requests.get(url, headers=headers, timeout=10)
     r.raise_for_status()
@@ -146,16 +143,16 @@ def _fetch_brent_requests():
     return close
 
 
-def fetch_brent():
+def _fetch_single(ticker: str):
     """Returns (close_series, current_price, pct_change_1d)."""
     close = pd.Series(dtype=float)
-    for fn in (_fetch_brent_yfinance, _fetch_brent_requests):
+    for fn in (_fetch_price_yfinance, _fetch_price_requests):
         try:
-            close = fn()
+            close = fn(ticker)
             if not close.empty:
                 break
         except Exception as exc:
-            print(f"[fetchers] Brent attempt failed ({fn.__name__}): {exc}")
+            print(f"[fetchers] {ticker} attempt failed ({fn.__name__}): {exc}")
 
     if close.empty:
         return close, 0.0, 0.0
@@ -164,6 +161,18 @@ def fetch_brent():
     prev = float(close.iloc[-2]) if len(close) > 1 else current
     pct = (current - prev) / prev * 100
     return close, current, pct
+
+
+def fetch_brent():
+    """Returns (close_series, current_price, pct_change_1d)."""
+    return _fetch_single("BZ=F")
+
+
+def fetch_oil_prices():
+    """Returns (brent_series, brent_price, brent_pct, wti_series, wti_price, wti_pct)."""
+    brent_close, brent_price, brent_pct = _fetch_single("BZ=F")
+    wti_close, wti_price, wti_pct = _fetch_single("CL=F")
+    return brent_close, brent_price, brent_pct, wti_close, wti_price, wti_pct
 
 
 def fetch_og_events():

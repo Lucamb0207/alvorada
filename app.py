@@ -127,7 +127,7 @@ app.layout = dbc.Container(
                     dbc.Card(
                         [
                             dbc.CardHeader(
-                                [html.Span("📈  ", className="me-1"), html.Strong("Preço Brent Crude (30 dias)")],
+                                [html.Span("📈  ", className="me-1"), html.Strong("Preço Brent & WTI (30 dias)")],
                                 className="py-2",
                             ),
                             dbc.CardBody(
@@ -269,57 +269,57 @@ def update_og_events(_):
 
 @app.callback(Output("brent-chart", "figure"), Input("interval", "n_intervals"))
 def update_brent(_):
-    df, current, pct = fetchers.fetch_brent()
+    brent_close, brent_price, brent_pct, wti_close, wti_price, wti_pct = fetchers.fetch_oil_prices()
 
-    if df.empty or len(df) == 0:
-        fig = go.Figure()
+    fig = go.Figure()
+
+    if brent_close.empty and wti_close.empty:
         fig.add_annotation(text="Dados não disponíveis", x=0.5, y=0.5, showarrow=False, font=dict(color="#aaa"))
         fig.update_layout(**_dark_layout())
         return fig
 
-    dates = df.index.tolist()
-    closes = df.tolist()
+    brent_color = "#64b5f6"
+    wti_color   = "#FFD600"
 
-    color = "#00e676" if pct >= 0 else "#ff5252"
-    fillcolor = "rgba(0,230,118,0.08)" if pct >= 0 else "rgba(255,82,82,0.08)"
-    arrow = "▲" if pct >= 0 else "▼"
+    if not brent_close.empty:
+        fig.add_trace(go.Scatter(
+            x=brent_close.index.tolist(), y=brent_close.tolist(),
+            mode="lines", name="Brent",
+            line=dict(color=brent_color, width=2),
+            hovertemplate="%{x|%d/%m}<br>Brent US$ %{y:.2f}<extra></extra>",
+        ))
 
-    fig = go.Figure()
-    fig.add_trace(
-        go.Scatter(
-            x=dates,
-            y=closes,
-            mode="lines",
-            line=dict(color=color, width=2),
-            fill="tozeroy",
-            fillcolor=fillcolor,
-            hovertemplate="%{x|%d/%m}<br>US$ %{y:.2f}<extra></extra>",
-        )
-    )
+    if not wti_close.empty:
+        fig.add_trace(go.Scatter(
+            x=wti_close.index.tolist(), y=wti_close.tolist(),
+            mode="lines", name="WTI",
+            line=dict(color=wti_color, width=2),
+            hovertemplate="%{x|%d/%m}<br>WTI US$ %{y:.2f}<extra></extra>",
+        ))
 
-    fig.add_annotation(
-        text=f"US$ {current:.2f}  {arrow} {abs(pct):.2f}%",
-        xref="paper", yref="paper",
-        x=0.01, y=0.95,
-        showarrow=False,
-        font=dict(size=16, color=color),
-        align="left",
-    )
+    annotations = []
+    if brent_price:
+        arrow = "▲" if brent_pct >= 0 else "▼"
+        annotations.append(dict(
+            text=f"Brent  US$ {brent_price:.2f}  {arrow} {abs(brent_pct):.2f}%",
+            xref="paper", yref="paper", x=0.01, y=0.97,
+            showarrow=False, font=dict(size=13, color=brent_color), align="left",
+        ))
+    if wti_price:
+        arrow = "▲" if wti_pct >= 0 else "▼"
+        annotations.append(dict(
+            text=f"WTI     US$ {wti_price:.2f}  {arrow} {abs(wti_pct):.2f}%",
+            xref="paper", yref="paper", x=0.01, y=0.82,
+            showarrow=False, font=dict(size=13, color=wti_color), align="left",
+        ))
 
     fig.update_layout(
         **_dark_layout(),
         margin=dict(l=10, r=10, t=10, b=30),
-        xaxis=dict(
-            showgrid=False,
-            tickfont=dict(size=10, color="#888"),
-            tickformat="%d/%m",
-        ),
-        yaxis=dict(
-            showgrid=True,
-            gridcolor="#1e2130",
-            tickfont=dict(size=10, color="#888"),
-            tickprefix="$",
-        ),
+        annotations=annotations,
+        legend=dict(orientation="h", x=0.5, xanchor="center", y=1.05, font=dict(size=10, color="#ccc")),
+        xaxis=dict(showgrid=False, tickfont=dict(size=10, color="#888"), tickformat="%d/%m"),
+        yaxis=dict(showgrid=True, gridcolor="#1e2130", tickfont=dict(size=10, color="#888"), tickprefix="$"),
     )
     return fig
 
