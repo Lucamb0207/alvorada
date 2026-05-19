@@ -355,47 +355,38 @@ def update_producao(_):
     pb    = [r.get("pb_bls") for r in rows]
     pn    = [r.get("pn_bls") for r in rows]
 
-    # Use most recent non-null values for the horizontal reference lines
-    pdt_val  = next((r["pdt_plan"]         for r in reversed(rows) if r.get("pdt_plan")),         None)
-    prom_val = next((r["prom_mes_operada"] for r in reversed(rows) if r.get("prom_mes_operada")), None)
-
-    print(f"[producao] {len(rows)} rows | dates={dates} | pb={pb} | pn={pn}")
+    prom_per_day = [r.get("prom_mes_operada") for r in rows]
+    pdt_per_day  = [r.get("pdt_plan") for r in rows]
 
     fig = go.Figure()
 
     fig.add_trace(go.Bar(
         x=dates, y=pb, name="PB Bruto",
         marker_color="#0d2b6e",
-        text=[str(v) if v else "" for v in pb],
-        textposition="outside",
-        textfont=dict(size=10, color="#e0e0e0"),
         hovertemplate="%{x}<br>PB Bruto: %{y} bls<extra></extra>",
     ))
 
     fig.add_trace(go.Bar(
         x=dates, y=pn, name="PB Neto",
         marker_color="#FFD600",
-        text=[str(v) if v else "" for v in pn],
-        textposition="outside",
-        textfont=dict(size=10, color="#e0e0e0"),
         hovertemplate="%{x}<br>PB Neto: %{y} bls<extra></extra>",
     ))
 
-    if pdt_val:
-        fig.add_hline(
-            y=pdt_val, line_color="#90caf9", line_width=2,
-            annotation_text=f"PDT {pdt_val}",
-            annotation_font=dict(color="#90caf9", size=10),
-            annotation_position="top right",
-        )
+    fig.add_trace(go.Scatter(
+        x=dates, y=pdt_per_day, name="PDT",
+        mode="lines+markers",
+        line=dict(color="#90caf9", width=2),
+        marker=dict(size=4),
+        hovertemplate="%{x}<br>PDT: %{y} bls<extra></extra>",
+    ))
 
-    if prom_val:
-        fig.add_hline(
-            y=prom_val, line_color="#cfd8dc", line_width=2,
-            annotation_text=f"Prom {prom_val}",
-            annotation_font=dict(color="#cfd8dc", size=10),
-            annotation_position="bottom right",
-        )
+    fig.add_trace(go.Scatter(
+        x=dates, y=prom_per_day, name="Prom Mês",
+        mode="lines+markers",
+        line=dict(color="#cfd8dc", width=2, dash="dot"),
+        marker=dict(size=4),
+        hovertemplate="%{x}<br>Prom Mês: %{y} bls<extra></extra>",
+    ))
 
     fig.update_layout(
         paper_bgcolor="rgba(0,0,0,0)",
