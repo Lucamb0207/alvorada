@@ -360,49 +360,49 @@ def update_producao(_):
 
     fig = go.Figure()
 
-    # PB Bruto bars — azul
+    # PB Bruto bars — azul escuro
     fig.add_trace(go.Bar(
         x=dates, y=pb, name="PB Bruto",
-        marker_color="#1565C0",
+        marker_color="#0d2b6e",
         text=pb, textposition="outside",
-        textfont=dict(size=10, color="#ccc"),
+        textfont=dict(size=10, color="#e0e0e0"),
         hovertemplate="%{x|%d/%m}<br>PB Bruto: %{y} bls<extra></extra>",
     ))
 
-    # PB Neto bars — laranja
+    # PB Neto bars — amarelo
     fig.add_trace(go.Bar(
         x=dates, y=pn, name="PB Neto",
-        marker_color="#E65100",
+        marker_color="#FFD600",
         text=pn, textposition="outside",
-        textfont=dict(size=10, color="#ccc"),
+        textfont=dict(size=10, color="#e0e0e0"),
         hovertemplate="%{x|%d/%m}<br>PB Neto: %{y} bls<extra></extra>",
     ))
 
     # Linha PDT — azul claro horizontal
     if pdt_val:
         fig.add_hline(
-            y=pdt_val, line_color="#00b4d8", line_width=2,
+            y=pdt_val, line_color="#90caf9", line_width=2,
             annotation_text=f"PDT {pdt_val:,}".replace(",", "."),
-            annotation_font=dict(color="#00b4d8", size=10),
+            annotation_font=dict(color="#90caf9", size=10),
             annotation_position="top right",
         )
 
-    # Linha Prom Mês — verde horizontal
+    # Linha Prom Mês — cinza claro horizontal
     if prom_val:
         fig.add_hline(
-            y=prom_val, line_color="#00c853", line_width=2,
+            y=prom_val, line_color="#cfd8dc", line_width=2,
             annotation_text=f"Prom Mês {prom_val:,}".replace(",", "."),
-            annotation_font=dict(color="#00c853", size=10),
+            annotation_font=dict(color="#cfd8dc", size=10),
             annotation_position="bottom right",
         )
 
     # Adicionar entradas de legenda para as linhas horizontais
     if pdt_val:
         fig.add_trace(go.Scatter(x=[None], y=[None], mode="lines", name="PDT",
-                                 line=dict(color="#00b4d8", width=2)))
+                                 line=dict(color="#90caf9", width=2)))
     if prom_val:
         fig.add_trace(go.Scatter(x=[None], y=[None], mode="lines", name="Prom Mês",
-                                 line=dict(color="#00c853", width=2)))
+                                 line=dict(color="#cfd8dc", width=2)))
 
     yvals = [v for v in pb + pn if v] + ([pdt_val] if pdt_val else []) + ([prom_val] if prom_val else [])
     y_min = min(yvals) * 0.96 if yvals else 0
