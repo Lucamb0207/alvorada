@@ -170,3 +170,12 @@ def fetch_og_events():
     """Returns (static_events, news_events)."""
     news = fetch_news(OG_EVENTS_FEEDS, max_items=5)
     return STATIC_EVENTS, news
+
+
+def fetch_producao(days: int = 60):
+    try:
+        import db
+        return db.fetch_producao(days)
+    except Exception as exc:
+        print(f"[fetchers] producao error: {exc}")
+        return []

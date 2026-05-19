@@ -153,6 +153,33 @@ app.layout = dbc.Container(
         ),
 
         dcc.Interval(id="interval", interval=REFRESH_MS, n_intervals=0),
+
+        # ── Row 4: Production Chart | KPIs ─────────────────────────────────
+        html.Hr(style={"borderColor": "#2a2d3a", "margin": "8px 0"}),
+        dbc.Row([
+            dbc.Col(
+                dbc.Card([
+                    dbc.CardHeader([html.Span("🛢️  ", className="me-1"), html.Strong("Produção Diária — GED-14 (bls)")], className="py-2"),
+                    dbc.CardBody(
+                        dcc.Loading(dcc.Graph(id="prod-chart", config={"displayModeBar": False}, style={"height": "260px"}), type="circle", color="#0dcaf0"),
+                        className="p-1",
+                    ),
+                ], className="h-100 shadow-sm"),
+                md=8, className="mb-3",
+            ),
+            dbc.Col(
+                dbc.Card([
+                    dbc.CardHeader([html.Span("📊  ", className="me-1"), html.Strong("KPIs do Mês")], className="py-2"),
+                    dbc.CardBody(dcc.Loading(html.Div(id="prod-kpis"), type="circle", color="#0dcaf0"), className="p-2"),
+                ], className="h-100 shadow-sm"),
+                md=4, className="mb-3",
+            ),
+        ]),
+
+        # ── Row 5: Failures ────────────────────────────────────────────────
+        dbc.Row([
+            dbc.Col(_card("⚠️", "Falhas & Explicações Recentes", "prod-falhas"), md=12, className="mb-3"),
+        ]),
     ],
 )
 
@@ -301,6 +328,94 @@ def update_brent(_):
 def update_ofac(_):
     items = fetchers.fetch_news(fetchers.OFAC_FEEDS, max_items=10)
     return _news_items(items, accent="#dc3545")
+
+
+@app.callback(
+    Output("prod-chart", "figure"),
+    Output("prod-kpis", "children"),
+    Output("prod-falhas", "children"),
+    Input("interval", "n_intervals"),
+)
+def update_producao(_):
+    rows = fetchers.fetch_producao(days=60)
+
+    empty_fig = go.Figure()
+    empty_fig.add_annotation(text="Sem dados — rode parse_report.py para alimentar", x=0.5, y=0.5, showarrow=False, font=dict(color="#888", size=12))
+    empty_fig.update_layout(**_dark_layout(), margin=dict(l=10, r=10, t=10, b=10))
+
+    if not rows:
+        return (
+            empty_fig,
+            html.P("Sem dados de produção ainda.", className="text-muted small"),
+            html.P("Sem falhas registradas.", className="text-muted small"),
+        )
+
+    dates   = [r["fecha"] for r in rows]
+    pn      = [r["pn_bls"] for r in rows]
+    pdt     = [r["pdt_plan"] for r in rows]
+    colors  = ["#00e676" if (p and d and p >= d) else "#ff5252" for p, d in zip(pn, pdt)]
+
+    fig = go.Figure()
+    fig.add_trace(go.Bar(x=dates, y=pn, name="PN Diário", marker_color=colors,
+                         hovertemplate="%{x|%d/%m}<br>PN: %{y} bls<extra></extra>"))
+    if any(pdt):
+        fig.add_trace(go.Scatter(x=dates, y=pdt, name="PDT", mode="lines",
+                                 line=dict(color="#ffc107", width=2, dash="dash"),
+                                 hovertemplate="PDT: %{y} bls<extra></extra>"))
+    fig.update_layout(
+        **_dark_layout(),
+        margin=dict(l=10, r=10, t=10, b=30),
+        legend=dict(orientation="h", x=0, y=1.08, font=dict(size=11)),
+        xaxis=dict(showgrid=False, tickfont=dict(size=10, color="#888"), tickformat="%d/%m"),
+        yaxis=dict(showgrid=True, gridcolor="#1e2130", tickfont=dict(size=10, color="#888")),
+        showlegend=True,
+        barmode="group",
+    )
+
+    # KPIs from last row
+    last = rows[-1]
+    def _kpi(label, value, unit="bls", good=None):
+        if value is None:
+            return html.Div([html.Span(label + ": ", className="text-muted", style={"fontSize":"0.75rem"}),
+                             html.Span("—", className="text-muted")], className="mb-2")
+        color = "#e0e0e0"
+        if good is not None:
+            color = "#00e676" if good else "#ff5252"
+        return html.Div([
+            html.Div(label, className="text-muted", style={"fontSize": "0.70rem"}),
+            html.Div(f"{value:,} {unit}".replace(",", "."), style={"fontSize": "1.1rem", "fontWeight": "bold", "color": color}),
+        ], className="mb-2", style={"borderLeft": "3px solid #333", "paddingLeft": "8px"})
+
+    pn_last = last.get("pn_bls")
+    pdt_last = last.get("pdt_plan")
+    var = last.get("var_vs_pdt")
+    op = last.get("prom_mes_operada")
+    fisc = last.get("prom_mes_fiscalizada")
+
+    kpis = html.Div([
+        html.P(str(last["fecha"].strftime("%d/%m/%Y")), className="text-muted mb-2", style={"fontSize":"0.72rem"}),
+        _kpi("PN Dia", pn_last, good=(pn_last >= pdt_last if pn_last and pdt_last else None)),
+        _kpi("PDT Plan", pdt_last),
+        _kpi("Var vs PDT", var, good=(var >= 0 if var is not None else None)),
+        _kpi("Prom Mês Operada", op, good=(op >= pdt_last if op and pdt_last else None)),
+        _kpi("Prom Mês Fiscalizada", fisc),
+    ])
+
+    # Failures panel — last 5 days with falhas
+    falha_rows = [r for r in reversed(rows) if r.get("falhas")][:5]
+    if not falha_rows:
+        falhas_div = html.P("Nenhuma falha registrada.", className="text-muted small")
+    else:
+        items = []
+        for r in falha_rows:
+            bullets = r["falhas"].splitlines()
+            items.append(html.Div([
+                html.Span(r["fecha"].strftime("%d/%m/%Y"), className="text-muted me-2", style={"fontSize":"0.70rem"}),
+                *[html.Div("• " + b, style={"fontSize": "0.78rem", "color": "#e0e0e0", "marginLeft": "8px"}) for b in bullets],
+            ], style={"borderLeft": "3px solid #fd7e14", "paddingLeft": "8px", "marginBottom": "10px"}))
+        falhas_div = html.Div(items)
+
+    return fig, kpis, falhas_div
 
 
 # ---------------------------------------------------------------------------
