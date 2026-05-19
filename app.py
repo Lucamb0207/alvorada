@@ -350,7 +350,9 @@ def update_producao(_):
             html.P("Sem falhas registradas.", className="text-muted small"),
         )
 
-    dates = [r["fecha"] for r in rows]
+    # Convert date objects to ISO strings so Plotly treats them as dates
+    fecha_vals = [r["fecha"] for r in rows]
+    dates = [d.strftime("%Y-%m-%d") if hasattr(d, "strftime") else str(d) for d in fecha_vals]
     pb    = [r.get("pb_bls") for r in rows]
     pn    = [r.get("pn_bls") for r in rows]
 
@@ -413,7 +415,7 @@ def update_producao(_):
         title=dict(text="Produção", font=dict(size=14, color="#ccc"), x=0.5),
         margin=dict(l=10, r=80, t=40, b=30),
         legend=dict(orientation="h", x=0, y=1.12, font=dict(size=10, color="#ccc")),
-        xaxis=dict(showgrid=False, tickfont=dict(size=10, color="#888"), tickformat="%d/%m/%Y"),
+        xaxis=dict(type="date", showgrid=False, tickfont=dict(size=10, color="#888"), tickformat="%d/%m"),
         yaxis=dict(showgrid=True, gridcolor="#1e2130", tickfont=dict(size=10, color="#888"),
                    range=[y_min, y_max]),
         showlegend=True,
