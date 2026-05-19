@@ -1,0 +1,7 @@
+dash>=2.14.0
+dash-bootstrap-components>=1.5.0
+plotly>=5.17.0
+yfinance>=0.2.31
+feedparser>=6.0.10
+pandas>=2.1.0
+gunicorn>=21.2.0

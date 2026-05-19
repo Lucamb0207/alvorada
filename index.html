@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alvorada · Intelligence Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root {
+  --bg:        #0c0d0f;
+  --surface:   #131518;
+  --surface2:  #1a1d22;
+  --border:    rgba(255,255,255,0.07);
+  --border2:   rgba(255,255,255,0.12);
+  --text:      #e8e6e0;
+  --muted:     #7a7870;
+  --accent:    #c8a96e;
+  --accent2:   #8fb89a;
+  --danger:    #d4695a;
+  --up:        #7db88a;
+  --dn:        #d4695a;
+  --tag-ven:   #1e2d24;
+  --tag-ven-t: #7db88a;
+  --tag-og:    #2d2519;
+  --tag-og-t:  #c8a96e;
+  --tag-geo:   #1a2130;
+  --tag-geo-t: #6b9ec4;
+  --font-head: 'Syne', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+  --r: 6px;
+  --r2: 10px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.5;
+  min-height: 100vh;
+  padding: 20px 24px 40px;
+}
+
+/* ── HEADER ── */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 0.5px solid var(--border);
+}
+
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.brand-name {
+  font-family: var(--font-head);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.3px;
+}
+
+.brand-sub {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.countdown-wrap {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+#countdown-bar {
+  width: 80px;
+  height: 2px;
+  background: var(--border2);
+  border-radius: 1px;
+  overflow: hidden;
+}
+
+#countdown-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 1px;
+  width: 100%;
+  transition: width 1s linear;
+}
+
+.live-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--up);
+  animation: blink 2s infinite;
+}
+
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+#last-update {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.btn-refresh {
+  background: var(--surface2);
+  border: 0.5px solid var(--border2);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 5px 12px;
+  border-radius: var(--r);
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.btn-refresh:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── GRID ── */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 12px;
+}
+
+/* ── CARD ── */
+.card {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: var(--r2);
+  padding: 16px;
+  overflow: hidden;
+  position: relative;
+  transition: border-color 0.2s;
+}
+
+.card:hover { border-color: var(--border2); }
+
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.card-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.card-label::before {
+  content: '';
+  display: inline-block;
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+
+.card-label.ven::before { background: var(--tag-ven-t); }
+.card-label.og::before  { background: var(--tag-og-t); }
+.card-label.geo::before { background: var(--tag-geo-t); }
+.card-label.brent::before { background: var(--accent); }
+.card-label.events::before { background: #6b9ec4; }
+.card-label.todos::before { background: var(--accent2); }
+
+.card-time {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--muted);
+}
+
+/* ── NEWS ITEMS ── */
+.news-item {
+  padding: 9px 0;
+  border-bottom: 0.5px solid var(--border);
+}
+
+.news-item:last-child { border-bottom: none; padding-bottom: 0; }
+.news-item:first-child { padding-top: 0; }
+
+.news-tag {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 500;
+  padding: 2px 6px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 4px;
+}
+
+.tag-ven  { background: var(--tag-ven); color: var(--tag-ven-t); }
+.tag-og   { background: var(--tag-og);  color: var(--tag-og-t); }
+.tag-geo  { background: var(--tag-geo); color: var(--tag-geo-t); }
+
+.news-headline {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--text);
+  line-height: 1.45;
+  margin-bottom: 4px;
+}
+
+.news-meta {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--muted);
+}
+
+/* ── BRENT ── */
+.brent-big {
+  font-family: var(--font-head);
+  font-size: 38px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1;
+  letter-spacing: -1px;
+  margin-bottom: 4px;
+}
+
+.brent-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.brent-change {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.brent-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.up { color: var(--up); }
+.dn { color: var(--dn); }
+
+.mini-chart-wrap {
+  position: relative;
+  height: 68px;
+  margin-top: 4px;
+}
+
+/* ── EVENTS ── */
+.event-item {
+  display: flex;
+  gap: 12px;
+  padding: 9px 0;
+  border-bottom: 0.5px solid var(--border);
+  align-items: flex-start;
+}
+
+.event-item:last-child { border-bottom: none; padding-bottom: 0; }
+.event-item:first-child { padding-top: 0; }
+
+.event-cal {
+  min-width: 38px;
+  background: var(--surface2);
+  border: 0.5px solid var(--border2);
+  border-radius: var(--r);
+  text-align: center;
+  padding: 5px 4px;
+  flex-shrink: 0;
+}
+
+.event-day {
+  font-family: var(--font-head);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1;
+}
+
+.event-mon {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.event-name {
+  font-size: 12.5px;
+  color: var(--text);
+  line-height: 1.4;
+  font-weight: 400;
+  margin-bottom: 2px;
+}
+
+.event-loc {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--muted);
+}
+
+/* ── TODO ── */
+.todo-item {
+  display: flex;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 0.5px solid var(--border);
+  align-items: flex-start;
+}
+
+.todo-item:last-child { border-bottom: none; padding-bottom: 0; }
+.todo-item:first-child { padding-top: 0; }
+
+.todo-chk {
+  width: 15px; height: 15px;
+  border-radius: 3px;
+  border: 1px solid var(--border2);
+  flex-shrink: 0;
+  margin-top: 1px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.todo-chk:hover { border-color: var(--accent2); }
+.todo-chk.done { background: var(--accent2); border-color: var(--accent2); }
+.todo-chk.done::after {
+  content: '';
+  width: 8px; height: 5px;
+  border-left: 1.5px solid #0c0d0f;
+  border-bottom: 1.5px solid #0c0d0f;
+  transform: rotate(-45deg) translateY(-1px);
+  display: block;
+}
+
+.todo-body { flex: 1; }
+
+.todo-text {
+  font-size: 12.5px;
+  color: var(--text);
+  line-height: 1.4;
+}
+
+.todo-item.done .todo-text {
+  text-decoration: line-through;
+  color: var(--muted);
+}
+
+.todo-source {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+/* ── SKELETON / LOADING ── */
+.skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.skel {
+  background: var(--surface2);
+  border-radius: 3px;
+  animation: shimmer 1.4s infinite;
+}
+
+@keyframes shimmer {
+  0%   { opacity: 0.4; }
+  50%  { opacity: 0.8; }
+  100% { opacity: 0.4; }
+}
+
+.skel-tag  { height: 14px; width: 55px; }
+.skel-h    { height: 13px; }
+.skel-h.w80 { width: 80%; }
+.skel-h.w60 { width: 60%; }
+.skel-meta { height: 10px; width: 40%; }
+
+.skel-block {
+  padding: 9px 0;
+  border-bottom: 0.5px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.skel-block:last-child { border-bottom: none; }
+
+/* ── ERROR ── */
+.error-msg {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--danger);
+  padding: 12px 0;
+}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <span class="brand-name">Alvorada</span>
+    <span class="brand-sub">Intelligence Dashboard</span>
+  </div>
+  <div class="header-right">
+    <div class="countdown-wrap">
+      <div id="countdown-bar"><div id="countdown-fill"></div></div>
+      <span id="countdown-txt">10:00</span>
+    </div>
+    <div class="live-dot" title="Monitoramento ativo"></div>
+    <span id="last-update">—</span>
+    <button class="btn-refresh" onclick="triggerRefresh()">↺ atualizar</button>
+  </div>
+</header>
+
+<div class="grid">
+
+  <!-- 1. Venezuela O&G -->
+  <div class="card">
+    <div class="card-head">
+      <span class="card-label ven">Venezuela O&G</span>
+      <span class="card-time" id="ven-time"></span>
+    </div>
+    <div id="ven-news"><div class="skeleton">
+      <div class="skel-block"><div class="skel skel-tag"></div><div class="skel skel-h w80"></div><div class="skel skel-h w60"></div><div class="skel skel-meta"></div></div>
+      <div class="skel-block"><div class="skel skel-tag"></div><div class="skel skel-h w80"></div><div class="skel skel-meta"></div></div>
+      <div class="skel-block"><div class="skel skel-tag"></div><div class="skel skel-h w80"></div><div class="skel skel-meta"></div></div>
+    </div></div>
+  </div>
+
+  <!-- 2. Mercado Global O&G -->
+  <div class="card">
+    <div class="card-head">
+      <span class="card-label og">Mercado Global O&G</span>
+      <span class="card-time" id="og-time"></span>
+    </div>
+    <div id="og-news"><div class="skeleton">
+      <div class="skel-block"><div class="skel skel-tag"></div><div class="skel skel-h w80"></div><div class="skel skel-meta"></div></div>
+      <div class="skel-block"><div class="skel skel-tag"></div><div class="skel skel-h w80"></div><div class="skel skel-meta"></div></div>
+      <div class="skel-block"><div class="skel skel-tag"></div><div class="skel skel-h w80"></div><div class="skel skel-meta"></div></div>
+    </div></div>
+  </div>
+
+  <!-- 3. Brent -->
+  <div class="card">
+    <div class="card-head">
+      <span class="card-label brent">Brent Crude</span>
+      <span class="card-time" id="brent-tag"></span>
+    </div>
+    <div class="brent-big" id="brent-px">—</div>
+    <div class="brent-row">
+      <span class="brent-change" id="brent-chg">—</span>
+      <span class="brent-label">USD/bbl · ICE</span>
+    </div>
+    <div class="mini-chart-wrap">
+      <canvas id="brentChart" role="img" aria-label="Preço Brent últimos 7 dias"></canvas>
+    </div>
+  </div>
+
+  <!-- 4. Agenda O&G -->
+  <div class="card">
+    <div class="card-head">
+      <span class="card-label events">Agenda O&G</span>
+      <span class="card-time">Mai–Jun 2026</span>
+    </div>
+    <div id="og-events"><div class="skeleton">
+      <div class="skel-block"><div class="skel skel-h w80"></div><div class="skel skel-meta"></div></div>
+      <div class="skel-block"><div class="skel skel-h w80"></div><div class="skel skel-meta"></div></div>
+      <div class="skel-block"><div class="skel skel-h w80"></div><div class="skel skel-meta"></div></div>
+    </div></div>
+  </div>
+
+  <!-- 5. Geopolítica & Macro -->
+  <div class="card">
+    <div class="card-head">
+      <span class="card-label geo">Geopolítica & Macro</span>
+      <span class="card-time" id="geo-time"></span>
+    </div>
+    <div id="geo-news"><div class="skeleton">
+      <div class="skel-block"><div class="skel skel-tag"></div><div class="skel skel-h w80"></div><div class="skel skel-meta"></div></div>
+      <div class="skel-block"><div class="skel skel-tag"></div><div class="skel skel-h w80"></div><div class="skel skel-meta"></div></div>
+      <div class="skel-block"><div class="skel skel-tag"></div><div class="skel skel-h w80"></div><div class="skel skel-meta"></div></div>
+    </div></div>
+  </div>
+
+  <!-- 6. Action Items Gmail -->
+  <div class="card">
+    <div class="card-head">
+      <span class="card-label todos">Action Items</span>
+      <span class="card-time">Gmail</span>
+    </div>
+    <div id="todo-list"><div class="skeleton">
+      <div class="skel-block"><div class="skel skel-h w80"></div><div class="skel skel-meta"></div></div>
+      <div class="skel-block"><div class="skel skel-h w80"></div><div class="skel skel-meta"></div></div>
+      <div class="skel-block"><div class="skel skel-h w80"></div><div class="skel skel-meta"></div></div>
+    </div></div>
+  </div>
+
+</div>
+
+<script>
+const API = '/api/messages';
+let brentChart = null;
+let secondsLeft = 600;
+let countdownTimer = null;
+let refreshing = false;
+
+function nowTime() {
+  return new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+}
+
+// ── Countdown ──
+function startCountdown() {
+  if (countdownTimer) clearInterval(countdownTimer);
+  secondsLeft = 600;
+  updateCountdownUI();
+  countdownTimer = setInterval(() => {
+    secondsLeft--;
+    if (secondsLeft <= 0) {
+      secondsLeft = 600;
+      fetchAll();
+    }
+    updateCountdownUI();
+  }, 1000);
+}
+
+function updateCountdownUI() {
+  const m = Math.floor(secondsLeft / 60).toString().padStart(2, '0');
+  const s = (secondsLeft % 60).toString().padStart(2, '0');
+  document.getElementById('countdown-txt').textContent = `${m}:${s}`;
+  const pct = (secondsLeft / 600) * 100;
+  document.getElementById('countdown-fill').style.width = pct + '%';
+}
+
+// ── Render helpers ──
+function renderNews(containerId, timeId, items, tagClass) {
+  if (timeId) document.getElementById(timeId).textContent = nowTime();
+  document.getElementById(containerId).innerHTML = items.map(n => `
+    <div class="news-item">
+      <span class="news-tag tag-${tagClass}">${n.tag}</span>
+      <div class="news-headline">${n.headline}</div>
+      <div class="news-meta">${n.source} · ${n.age}</div>
+    </div>`).join('');
+}
+
+function renderBrent(price, change, pct, history) {
+  document.getElementById('brent-px').textContent = `$${price.toFixed(2)}`;
+  document.getElementById('brent-tag').textContent = nowTime();
+  const sign = change >= 0 ? '+' : '';
+  const chgEl = document.getElementById('brent-chg');
+  chgEl.textContent = `${sign}${change.toFixed(2)} (${sign}${pct.toFixed(2)}%)`;
+  chgEl.className = 'brent-change ' + (change >= 0 ? 'up' : 'dn');
+
+  if (brentChart) brentChart.destroy();
+  const ctx = document.getElementById('brentChart').getContext('2d');
+  const col = change >= 0 ? '#7db88a' : '#d4695a';
+  brentChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: history.map(h => h.d),
+      datasets: [{
+        data: history.map(h => h.v),
+        borderColor: col,
+        borderWidth: 1.5,
+        pointRadius: 0,
+        fill: true,
+        backgroundColor: change >= 0 ? 'rgba(125,184,138,0.1)' : 'rgba(212,105,90,0.1)',
+        tension: 0.4
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { enabled: false } },
+      scales: {
+        x: { display: false },
+        y: { display: false,
+          min: Math.min(...history.map(h=>h.v)) - 0.5,
+          max: Math.max(...history.map(h=>h.v)) + 0.5 }
+      },
+      animation: { duration: 600 }
+    }
+  });
+}
+
+function renderEvents(items) {
+  document.getElementById('og-events').innerHTML = items.map(e => `
+    <div class="event-item">
+      <div class="event-cal">
+        <div class="event-day">${e.day}</div>
+        <div class="event-mon">${e.mon}</div>
+      </div>
+      <div>
+        <div class="event-name">${e.name}</div>
+        <div class="event-loc">${e.loc}</div>
+      </div>
+    </div>`).join('');
+}
+
+function renderTodos(items) {
+  document.getElementById('todo-list').innerHTML = items.map((t, i) => `
+    <div class="todo-item" id="todo-${i}">
+      <div class="todo-chk" onclick="toggleTodo(${i})" role="checkbox" aria-checked="false" tabindex="0"
+           onkeydown="if(event.key==='Enter'||event.key===' ')toggleTodo(${i})"></div>
+      <div class="todo-body">
+        <div class="todo-text">${t.text}</div>
+        <div class="todo-source">${t.source}</div>
+      </div>
+    </div>`).join('');
+}
+
+function toggleTodo(i) {
+  const item = document.getElementById(`todo-${i}`);
+  const chk = item.querySelector('.todo-chk');
+  const done = chk.classList.toggle('done');
+  item.classList.toggle('done', done);
+  chk.setAttribute('aria-checked', done);
+}
+
+// ── API call ──
+async function callAPI(payload) {
+  const resp = await fetch(API, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+  return resp.json();
+}
+
+function extractJSON(data) {
+  let text = '';
+  for (const block of (data.content || [])) {
+    if (block.type === 'text') text += block.text;
+  }
+  return JSON.parse(text.replace(/```json|```/g, '').trim());
+}
+
+// ── Agentic loop — keeps calling until stop_reason === 'end_turn' ──
+async function agenticCall(payload, maxIter = 8) {
+  const messages = [...payload.messages];
+  let response;
+  for (let i = 0; i < maxIter; i++) {
+    response = await callAPI({ ...payload, messages });
+    if (response.stop_reason !== 'tool_use') break;
+    const toolResults = response.content
+      .filter(b => b.type === 'tool_use')
+      .map(b => ({ type: 'tool_result', tool_use_id: b.id, content: '' }));
+    messages.push({ role: 'assistant', content: response.content });
+    messages.push({ role: 'user', content: toolResults });
+  }
+  return response;
+}
+
+// ── Fetch news + brent ──
+async function fetchNews() {
+  const today = new Date().toISOString().slice(0, 10);
+  const system = `Você é um monitor de inteligência para empresa brasileira de petróleo na Venezuela (CPP/PDVSA). Use web_search para buscar notícias reais de hoje. Depois retorne APENAS JSON válido sem markdown. Estrutura: {"venezuela":[{"tag":"PDVSA|Sanções|CPP|Exportação|Maduro","headline":"manchete em português","source":"nome","age":"Xh atrás"}],"og_market":[{"tag":"OPEC|Preços|LNG|Upstream","headline":"manchete em português","source":"nome","age":"Xh atrás"}],"geopolitics":[{"tag":"EUA|China|Macro|LatAm|Fed","headline":"manchete em português","source":"nome","age":"Xh atrás"}],"brent":{"price":75.50,"change":0.32,"pct":0.43,"history":[{"d":"12/Mai","v":74.1},{"d":"13/Mai","v":74.6},{"d":"14/Mai","v":74.3},{"d":"15/Mai","v":75.0},{"d":"16/Mai","v":74.8},{"d":"17/Mai","v":75.2},{"d":"18/Mai","v":75.5}]}}. Exatamente 3 itens por seção. Brent real de hoje.`;
+  const data = await agenticCall({
+    model: 'claude-sonnet-4-20250514',
+    max_tokens: 3000,
+    tools: [{ type: 'web_search_20250305', name: 'web_search' }],
+    system,
+    messages: [{ role: 'user', content: `Hoje é ${today}. Busque: noticias Venezuela PDVSA sancoes hoje, petroleo OPEC precos hoje, geopolitica macro hoje, preco Brent hoje. Retorne JSON.` }]
+  });
+  return extractJSON(data);
+}
+
+// ── Fetch Gmail todos ──
+async function fetchGmail() {
+  const data = await agenticCall({
+    model: 'claude-sonnet-4-20250514',
+    max_tokens: 2000,
+    mcp_servers: [{ type: 'url', url: 'https://gmailmcp.googleapis.com/mcp/v1', name: 'gmail-mcp' }],
+    system: `Leia emails recentes/nao lidos do Gmail. Identifique action items pendentes. Retorne APENAS JSON: {"todos":[{"text":"acao em portugues max 65 chars","source":"De: Nome - assunto"}]}. Max 5 itens. Ignore newsletters.`,
+    messages: [{ role: 'user', content: 'Leia meus emails recentes e extraia action items pendentes. Retorne JSON.' }]
+  });
+  return extractJSON(data);
+}
+
+// ── Static events (updated periodically) ──
+const OG_EVENTS = [
+  { day: '26', mon: 'Mai', name: 'OPEC+ Reunião Ministerial', loc: 'Viena, Áustria' },
+  { day: '02', mon: 'Jun', name: 'Offshore Technology Conference', loc: 'Houston, EUA' },
+  { day: '10', mon: 'Jun', name: 'CERAWeek Latin America', loc: 'São Paulo, Brasil' },
+  { day: '18', mon: 'Jun', name: 'World Gas Conference', loc: 'Beijing, China' },
+  { day: '24', mon: 'Jun', name: 'Resultados 2T26 — Petrobras', loc: 'Rio de Janeiro, Brasil' },
+];
+
+// ── Main refresh ──
+async function fetchAll() {
+  if (refreshing) return;
+  refreshing = true;
+  document.getElementById('last-update').textContent = 'atualizando...';
+
+  // Events are static — render immediately
+  renderEvents(OG_EVENTS);
+
+  // News + Brent
+  try {
+    const news = await fetchNews();
+    if (news.venezuela)  renderNews('ven-news', 'ven-time', news.venezuela, 'ven');
+    if (news.og_market)  renderNews('og-news',  'og-time',  news.og_market,  'og');
+    if (news.geopolitics) renderNews('geo-news', 'geo-time', news.geopolitics, 'geo');
+    if (news.brent) renderBrent(news.brent.price, news.brent.change, news.brent.pct, news.brent.history);
+  } catch (e) {
+    console.error('Erro notícias:', e);
+    ['ven-news','og-news','geo-news'].forEach(id => {
+      document.getElementById(id).innerHTML = `<div class="error-msg">Falha ao buscar — verifique a API key. ${e.message}</div>`;
+    });
+  }
+
+  // Gmail todos
+  try {
+    const gmail = await fetchGmail();
+    if (gmail.todos && gmail.todos.length) renderTodos(gmail.todos);
+    else renderTodos([{ text: 'Nenhum action item encontrado', source: 'Gmail · ' + nowTime() }]);
+  } catch (e) {
+    console.error('Erro Gmail:', e);
+    renderTodos([{ text: 'Erro ao acessar Gmail. Verifique a conexão MCP.', source: e.message }]);
+  }
+
+  document.getElementById('last-update').textContent = `atualizado ${nowTime()}`;
+  refreshing = false;
+  startCountdown();
+}
+
+function triggerRefresh() { fetchAll(); }
+
+// ── Init ──
+fetchAll();
+</script>
+</body>
+</html>
