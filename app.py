@@ -350,26 +350,76 @@ def update_producao(_):
             html.P("Sem falhas registradas.", className="text-muted small"),
         )
 
-    dates   = [r["fecha"] for r in rows]
-    pn      = [r["pn_bls"] for r in rows]
-    pdt     = [r["pdt_plan"] for r in rows]
-    colors  = ["#00e676" if (p and d and p >= d) else "#ff5252" for p, d in zip(pn, pdt)]
+    dates = [r["fecha"] for r in rows]
+    pb    = [r.get("pb_bls") for r in rows]
+    pn    = [r.get("pn_bls") for r in rows]
+
+    # Use most recent non-null values for the horizontal reference lines
+    pdt_val  = next((r["pdt_plan"]         for r in reversed(rows) if r.get("pdt_plan")),         None)
+    prom_val = next((r["prom_mes_operada"] for r in reversed(rows) if r.get("prom_mes_operada")), None)
 
     fig = go.Figure()
-    fig.add_trace(go.Bar(x=dates, y=pn, name="PN Diário", marker_color=colors,
-                         hovertemplate="%{x|%d/%m}<br>PN: %{y} bls<extra></extra>"))
-    if any(pdt):
-        fig.add_trace(go.Scatter(x=dates, y=pdt, name="PDT", mode="lines",
-                                 line=dict(color="#ffc107", width=2, dash="dash"),
-                                 hovertemplate="PDT: %{y} bls<extra></extra>"))
+
+    # PB Bruto bars — azul
+    fig.add_trace(go.Bar(
+        x=dates, y=pb, name="PB Bruto",
+        marker_color="#1565C0",
+        text=pb, textposition="outside",
+        textfont=dict(size=10, color="#ccc"),
+        hovertemplate="%{x|%d/%m}<br>PB Bruto: %{y} bls<extra></extra>",
+    ))
+
+    # PB Neto bars — laranja
+    fig.add_trace(go.Bar(
+        x=dates, y=pn, name="PB Neto",
+        marker_color="#E65100",
+        text=pn, textposition="outside",
+        textfont=dict(size=10, color="#ccc"),
+        hovertemplate="%{x|%d/%m}<br>PB Neto: %{y} bls<extra></extra>",
+    ))
+
+    # Linha PDT — azul claro horizontal
+    if pdt_val:
+        fig.add_hline(
+            y=pdt_val, line_color="#00b4d8", line_width=2,
+            annotation_text=f"PDT {pdt_val:,}".replace(",", "."),
+            annotation_font=dict(color="#00b4d8", size=10),
+            annotation_position="top right",
+        )
+
+    # Linha Prom Mês — verde horizontal
+    if prom_val:
+        fig.add_hline(
+            y=prom_val, line_color="#00c853", line_width=2,
+            annotation_text=f"Prom Mês {prom_val:,}".replace(",", "."),
+            annotation_font=dict(color="#00c853", size=10),
+            annotation_position="bottom right",
+        )
+
+    # Adicionar entradas de legenda para as linhas horizontais
+    if pdt_val:
+        fig.add_trace(go.Scatter(x=[None], y=[None], mode="lines", name="PDT",
+                                 line=dict(color="#00b4d8", width=2)))
+    if prom_val:
+        fig.add_trace(go.Scatter(x=[None], y=[None], mode="lines", name="Prom Mês",
+                                 line=dict(color="#00c853", width=2)))
+
+    yvals = [v for v in pb + pn if v] + ([pdt_val] if pdt_val else []) + ([prom_val] if prom_val else [])
+    y_min = min(yvals) * 0.96 if yvals else 0
+    y_max = max(yvals) * 1.08 if yvals else 100
+
     fig.update_layout(
         **_dark_layout(),
-        margin=dict(l=10, r=10, t=10, b=30),
-        legend=dict(orientation="h", x=0, y=1.08, font=dict(size=11)),
-        xaxis=dict(showgrid=False, tickfont=dict(size=10, color="#888"), tickformat="%d/%m"),
-        yaxis=dict(showgrid=True, gridcolor="#1e2130", tickfont=dict(size=10, color="#888")),
+        title=dict(text="Produção", font=dict(size=14, color="#ccc"), x=0.5),
+        margin=dict(l=10, r=80, t=40, b=30),
+        legend=dict(orientation="h", x=0, y=1.12, font=dict(size=10, color="#ccc")),
+        xaxis=dict(showgrid=False, tickfont=dict(size=10, color="#888"), tickformat="%d/%m/%Y"),
+        yaxis=dict(showgrid=True, gridcolor="#1e2130", tickfont=dict(size=10, color="#888"),
+                   range=[y_min, y_max]),
         showlegend=True,
         barmode="group",
+        bargap=0.25,
+        bargroupgap=0.05,
     )
 
     # KPIs from last row
