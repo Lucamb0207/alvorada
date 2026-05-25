@@ -12,12 +12,27 @@ VENEZUELA_FEEDS = [
     "https://news.google.com/rss/search?q=venezuela&hl=pt-BR&gl=BR&ceid=BR:pt-419",
     "https://efectococuyo.com/feed/",
     "https://talcualdigital.com/feed/",
+    "https://venezuelanalysis.com/feed",
+    "https://prodavinci.com/feed",
+    "https://runrun.es/feed",
+    "https://www.elnacional.com/feed",
+    "https://dialogo-americas.com/feed/",
+    "https://www.infobae.com/arc/outboundfeeds/rss/",
+    "https://www.noticierodigital.com.ar/categoria/judiciales/feed/",
+    "https://www.noticierodigital.com.ar/categoria/sociales/feed/",
+    "https://www.noticierodigital.com.ar/categoria/sociedad/feed/",
+    "http://feeds.bbci.co.uk/news/world/latin_america/rss.xml",
+    "https://bastidoresdopoder.com.br/feed/",
 ]
 
 GLOBAL_FEEDS = [
     "https://feeds.reuters.com/reuters/topNews",
     "http://feeds.bbci.co.uk/news/world/rss.xml",
     "https://news.google.com/rss?hl=en-US&gl=US&ceid=US:en",
+    "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml",
+    "https://www.theguardian.com/world/rss",
+    "https://www.crisisgroup.org/rss.xml",
+    "https://www.hrw.org/rss/news",
 ]
 
 OG_NEWS_FEEDS = [
@@ -25,6 +40,13 @@ OG_NEWS_FEEDS = [
     "https://www.rigzone.com/news/rss/rigzone_latest.aspx",
     "https://www.energyvoice.com/feed/",
     "https://news.google.com/rss/search?q=oil+gas+energy+petroleum&hl=en&gl=US&ceid=US:en",
+    "https://www.worldoil.com/rss?feed=news",
+    "https://www.ogj.com/__rss/website-scheduled-content.xml?input=%7B%22sectionAlias%22%3A%22general-interest%22%7D",
+    "https://feeder.co/discover/073d51739a/opec-org-opec_web-en-pressreleases-rss",
+    "https://megawhat.energy/feed/",
+    "https://www.iogp.org/feed/",
+    "https://boereport.com/feed/",
+    "https://www.worldenergytrade.com/feed",
 ]
 
 OG_EVENTS_FEEDS = [
@@ -39,13 +61,16 @@ OFAC_FEEDS = [
 
 # Curated upcoming O&G industry conferences
 STATIC_EVENTS = [
-    {"name": "Gastech 2025", "date": "Set/2025", "location": "Houston, TX", "url": "https://www.gastechevent.com"},
-    {"name": "SPE ATCE 2025", "date": "Set/2025", "location": "Houston, TX", "url": "https://www.spe.org/en/atce/"},
-    {"name": "Africa Oil Week 2025", "date": "Out/2025", "location": "Cape Town, ZA", "url": "https://africa-oilweek.com"},
-    {"name": "ADIPEC 2025", "date": "Nov/2025", "location": "Abu Dhabi, UAE", "url": "https://adipec.com"},
-    {"name": "IP Week 2026", "date": "Fev/2026", "location": "London, UK", "url": "https://www.energyinst.org/ipweek"},
-    {"name": "CERAWeek 2026", "date": "Mar/2026", "location": "Houston, TX", "url": "https://ceraweek.com"},
-    {"name": "OTC 2026", "date": "Mai/2026", "location": "Houston, TX", "url": "https://www.otcnet.org"},
+    {"name": "International Energy Summit 2026", "date": "Jun/2026", "location": "New Orleans, LA, USA", "url": "https://www.theenergysummit.org/"},
+    {"name": "Gas, LNG & The Future of Energy 2026", "date": "Jun/2026", "location": "London, UK", "url": "https://www.woodmac.com/events/gas-lng-future-of-energy-conference/"},
+    {"name": "URTeC 2026", "date": "Jun/2026", "location": "Houston, TX, USA", "url": "https://www.urtec.org/"},
+    {"name": "ONS 2026", "date": "Aug/2026", "location": "Stavanger, Norway", "url": "https://www.ons.no/"},
+    {"name": "Oil & Gas Asia (OGA) 2026", "date": "Sep/2026", "location": "Kuala Lumpur, Malaysia", "url": "https://www.oilandgas-asia.com/"},
+    {"name": "APPEC 2026", "date": "Sep/2026", "location": "Singapore", "url": "https://www.spglobal.com/commodityinsights/en/events/appec"},
+    {"name": "Gastech 2026", "date": "Sep/2026", "location": "Bangkok, Thailand", "url": "https://www.gastechevent.com/"},
+    {"name": "Subsea Pipeline Technology Congress 2026", "date": "Sep/2026", "location": "London, UK", "url": "https://www.subpipeline.com/"},
+    {"name": "SPE ATCE 2026", "date": "Oct/2026", "location": "Houston, TX, USA", "url": "https://www.atce.org/"},
+    {"name": "ADIPEC 2026", "date": "Nov/2026", "location": "Abu Dhabi, UAE", "url": "https://www.adipec.com/"},
 ]
 
 # ---------------------------------------------------------------------------

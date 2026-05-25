@@ -76,7 +76,7 @@ pip install -r requirements.txt
 ### 3.4 Configurar a DATABASE_URL
 No PowerShell, antes de rodar os scripts, sempre defina a variável:
 ```powershell
-$env:DATABASE_URL = "postgresql://usuario:senha@host/banco"
+$env:DATABASE_URL = "postgresql://usuario:senha@host/banco" DEVE SER A EXTERNA
 ```
 > Substitua pela URL completa fornecida pelo Luca (ver Seção 2.3).
 > Essa variável não fica salva — precisa ser definida toda vez que abrir um novo terminal.
