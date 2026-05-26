@@ -194,19 +194,19 @@ def update_timestamp(_):
 
 @app.callback(Output("venezuela-news", "children"), Input("interval", "n_intervals"))
 def update_venezuela(_):
-    items = fetchers.fetch_news(fetchers.VENEZUELA_FEEDS, max_items=8)
+    items = fetchers.fetch_news(fetchers.VENEZUELA_FEEDS, max_items=100)
     return _news_items(items, accent="#FFD700")
 
 
 @app.callback(Output("global-news", "children"), Input("interval", "n_intervals"))
 def update_global(_):
-    items = fetchers.fetch_news(fetchers.GLOBAL_FEEDS, max_items=10)
+    items = fetchers.fetch_news(fetchers.GLOBAL_FEEDS, max_items=100)
     return _news_items(items, accent="#0dcaf0")
 
 
 @app.callback(Output("og-news", "children"), Input("interval", "n_intervals"))
 def update_og_news(_):
-    items = fetchers.fetch_news(fetchers.OG_NEWS_FEEDS, max_items=8)
+    items = fetchers.fetch_news(fetchers.OG_NEWS_FEEDS, max_items=100)
     return _news_items(items, accent="#fd7e14")
 
 
@@ -326,7 +326,7 @@ def update_brent(_):
 
 @app.callback(Output("ofac-news", "children"), Input("interval", "n_intervals"))
 def update_ofac(_):
-    items = fetchers.fetch_news(fetchers.OFAC_FEEDS, max_items=10)
+    items = fetchers.fetch_news(fetchers.OFAC_FEEDS, max_items=100)
     return _news_items(items, accent="#dc3545")
 
 
