@@ -61,24 +61,24 @@ OFAC_FEEDS = [
 
 # Curated upcoming O&G industry conferences
 STATIC_EVENTS = [
-    {"name": "Sergipe O&G (SOG26)", "date": "29–31 Jul 2026", "location": "Aracaju, SE – Brasil", "url": "https://sergipeoilgas.com.br"},
-    {"name": "ROG.e — Rio Oil & Gas", "date": "21–24 Set 2026", "location": "Rio de Janeiro, RJ – Brasil", "url": "https://roge.energy"},
-    {"name": "Mec Show", "date": "4–6 Ago 2026", "location": "Serra, ES – Brasil", "url": "https://www.mecshow.com.br"},
     {"name": "IES — International Energy Summit", "date": "2–4 Jun 2026", "location": "New Orleans, LA – EUA", "url": "https://www.aien.org"},
-    {"name": "URTeC — Unconventional Resources Technology Conf.", "date": "22–24 Jun 2026", "location": "Houston, TX – EUA", "url": "https://urtec.org"},
-    {"name": "SPE ATCE — Annual Technical Conference & Exhibition", "date": "21–23 Out 2026", "location": "Houston, TX – EUA", "url": "https://www.atce.org"},
-    {"name": "ONS — Offshore Northern Seas", "date": "24–27 Ago 2026", "location": "Stavanger – Noruega", "url": "https://www.ons.no"},
     {"name": "EAGE Annual Conference & Exhibition", "date": "8–11 Jun 2026", "location": "Aberdeen – Reino Unido", "url": "https://eageannual.org"},
-    {"name": "OEEC — Offshore Energy Exhibition & Conference", "date": "24–25 Nov 2026", "location": "Amsterdã – Países Baixos", "url": "https://oeec.biz"},
-    {"name": "SPE Offshore Europe", "date": "7–9 Set 2027 (bienal)", "location": "Aberdeen – Reino Unido", "url": "https://www.offshore-europe.co.uk"},
-    {"name": "ERTC — European Refining Technology Conference", "date": "30 Nov–3 Dez 2026", "location": "Madri – Espanha", "url": "https://www.ertc.com"},
     {"name": "IADC World Drilling Conference", "date": "16–17 Jun 2026", "location": "Estoril – Portugal", "url": "https://www.iadc.org"},
-    {"name": "WPC Energy Congress", "date": "11–15 Out 2026", "location": "Riade – Arábia Saudita", "url": "https://wpcenergy2026.org"},
-    {"name": "ADIPEC — Abu Dhabi International Petroleum Exhib. & Conf.", "date": "2–5 Nov 2026", "location": "Abu Dhabi – Emirados Árabes", "url": "https://www.adipec.com"},
-    {"name": "Gastech Exhibition & Conference", "date": "14–17 Set 2026", "location": "Bangkok – Tailândia", "url": "https://www.gastechevent.com"},
-    {"name": "APPEC — Asia Pacific Petroleum Conference", "date": "7–10 Set 2026", "location": "Singapura", "url": "https://www.spglobal.com/energy/en/events/conferences/appec"},
+    {"name": "URTeC — Unconventional Resources Technology Conf.", "date": "22–24 Jun 2026", "location": "Houston, TX – EUA", "url": "https://urtec.org"},
+    {"name": "Sergipe O&G (SOG26)", "date": "29–31 Jul 2026", "location": "Aracaju, SE – Brasil", "url": "https://sergipeoilgas.com.br"},
+    {"name": "Mec Show", "date": "4–6 Ago 2026", "location": "Serra, ES – Brasil", "url": "https://www.mecshow.com.br"},
+    {"name": "ONS — Offshore Northern Seas", "date": "24–27 Ago 2026", "location": "Stavanger – Noruega", "url": "https://www.ons.no"},
     {"name": "OGA — Oil & Gas Asia", "date": "2–4 Set 2026", "location": "Kuala Lumpur – Malásia", "url": "https://www.oilandgas-asia.com"},
+    {"name": "APPEC — Asia Pacific Petroleum Conference", "date": "7–10 Set 2026", "location": "Singapura", "url": "https://www.spglobal.com/energy/en/events/conferences/appec"},
+    {"name": "Gastech Exhibition & Conference", "date": "14–17 Set 2026", "location": "Bangkok – Tailândia", "url": "https://www.gastechevent.com"},
+    {"name": "ROG.e — Rio Oil & Gas", "date": "21–24 Set 2026", "location": "Rio de Janeiro, RJ – Brasil", "url": "https://roge.energy"},
+    {"name": "WPC Energy Congress", "date": "11–15 Out 2026", "location": "Riade – Arábia Saudita", "url": "https://wpcenergy2026.org"},
+    {"name": "SPE ATCE — Annual Technical Conference & Exhibition", "date": "21–23 Out 2026", "location": "Houston, TX – EUA", "url": "https://www.atce.org"},
+    {"name": "ADIPEC — Abu Dhabi International Petroleum Exhib. & Conf.", "date": "2–5 Nov 2026", "location": "Abu Dhabi – Emirados Árabes", "url": "https://www.adipec.com"},
+    {"name": "OEEC — Offshore Energy Exhibition & Conference", "date": "24–25 Nov 2026", "location": "Amsterdã – Países Baixos", "url": "https://oeec.biz"},
+    {"name": "ERTC — European Refining Technology Conference", "date": "30 Nov–3 Dez 2026", "location": "Madri – Espanha", "url": "https://www.ertc.com"},
     {"name": "OSEA — Offshore South East Asia", "date": "13–15 Abr 2027 (bienal)", "location": "Singapura", "url": "https://www.osea-asia.com"},
+    {"name": "SPE Offshore Europe", "date": "7–9 Set 2027 (bienal)", "location": "Aberdeen – Reino Unido", "url": "https://www.offshore-europe.co.uk"},
 ]
 
 # ---------------------------------------------------------------------------
