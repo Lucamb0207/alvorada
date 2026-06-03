@@ -352,24 +352,16 @@ def update_producao(_):
 
     fecha_vals = [r["fecha"] for r in rows]
     dates = [d.strftime("%d/%m") if hasattr(d, "strftime") else str(d) for d in fecha_vals]
-    pb    = [r.get("pb_bls") for r in rows]
-    pn    = [r.get("pn_bls") for r in rows]
-
+    pn           = [r.get("pn_bls") for r in rows]
     prom_per_day = [r.get("prom_mes_operada") for r in rows]
     pdt_per_day  = [r.get("pdt_plan") for r in rows]
 
     fig = go.Figure()
 
     fig.add_trace(go.Bar(
-        x=dates, y=pb, name="PB Bruto",
-        marker_color="#0d2b6e",
-        hovertemplate="%{x}<br>PB Bruto: %{y} bls<extra></extra>",
-    ))
-
-    fig.add_trace(go.Bar(
-        x=dates, y=pn, name="PB Neto",
+        x=dates, y=pn, name="PN Neto",
         marker_color="#FFD600",
-        hovertemplate="%{x}<br>PB Neto: %{y} bls<extra></extra>",
+        hovertemplate="%{x}<br>PN Neto: %{y} bls<extra></extra>",
     ))
 
     fig.add_trace(go.Scatter(
@@ -393,7 +385,7 @@ def update_producao(_):
         plot_bgcolor="rgba(0,0,0,0)",
         font=dict(color="#ccc"),
         barmode="group",
-        bargap=0.25,
+        bargap=0.3,
         bargroupgap=0.05,
         showlegend=True,
         title=dict(text="Produção", font=dict(size=14, color="#ccc"), x=0.5),
@@ -417,19 +409,17 @@ def update_producao(_):
             html.Div(f"{value:,} {unit}".replace(",", "."), style={"fontSize": "1.1rem", "fontWeight": "bold", "color": color}),
         ], className="mb-2", style={"borderLeft": "3px solid #333", "paddingLeft": "8px"})
 
-    pn_last = last.get("pn_bls")
+    pn_last  = last.get("pn_bls")
     pdt_last = last.get("pdt_plan")
-    var = last.get("var_vs_pdt")
-    op = last.get("prom_mes_operada")
-    fisc = last.get("prom_mes_fiscalizada")
+    var      = last.get("var_vs_pdt")
+    op       = last.get("prom_mes_operada")
 
     kpis = html.Div([
         html.P(str(last["fecha"].strftime("%d/%m/%Y")), className="text-muted mb-2", style={"fontSize":"0.72rem"}),
         _kpi("PN Dia", pn_last, good=(pn_last >= pdt_last if pn_last and pdt_last else None)),
+        _kpi("Prom Mês Operada", op, good=(op >= pdt_last if op and pdt_last else None)),
         _kpi("PDT Plan", pdt_last),
         _kpi("Var vs PDT", var, good=(var >= 0 if var is not None else None)),
-        _kpi("Prom Mês Operada", op, good=(op >= pdt_last if op and pdt_last else None)),
-        _kpi("Prom Mês Fiscalizada", fisc),
     ])
 
     # Failures panel — last 5 days with falhas
