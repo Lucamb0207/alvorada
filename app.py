@@ -360,14 +360,14 @@ def update_producao(_):
 
     fig.add_trace(go.Bar(
         x=dates, y=pn, name="PN Neto",
-        marker_color="#FFD600",
+        marker_color="#1565C0",
         hovertemplate="%{x}<br>PN Neto: %{y} bls<extra></extra>",
     ))
 
     fig.add_trace(go.Scatter(
         x=dates, y=pdt_per_day, name="PDT",
         mode="lines+markers",
-        line=dict(color="#90caf9", width=2),
+        line=dict(color="#FFD600", width=2),
         marker=dict(size=4),
         hovertemplate="%{x}<br>PDT: %{y} bls<extra></extra>",
     ))
@@ -397,13 +397,13 @@ def update_producao(_):
 
     # KPIs from last row
     last = rows[-1]
-    def _kpi(label, value, unit="bls", good=None):
+    def _kpi(label, value, unit="bls", red_if_negative=False):
         if value is None:
             return html.Div([html.Span(label + ": ", className="text-muted", style={"fontSize":"0.75rem"}),
                              html.Span("—", className="text-muted")], className="mb-2")
         color = "#e0e0e0"
-        if good is not None:
-            color = "#00e676" if good else "#ff5252"
+        if red_if_negative and value < 0:
+            color = "#ff5252"
         return html.Div([
             html.Div(label, className="text-muted", style={"fontSize": "0.70rem"}),
             html.Div(f"{value:,} {unit}".replace(",", "."), style={"fontSize": "1.1rem", "fontWeight": "bold", "color": color}),
@@ -416,10 +416,10 @@ def update_producao(_):
 
     kpis = html.Div([
         html.P(str(last["fecha"].strftime("%d/%m/%Y")), className="text-muted mb-2", style={"fontSize":"0.72rem"}),
-        _kpi("PN Dia", pn_last, good=(pn_last >= pdt_last if pn_last and pdt_last else None)),
-        _kpi("Prom Mês Operada", op, good=(op >= pdt_last if op and pdt_last else None)),
+        _kpi("PN Dia", pn_last),
+        _kpi("Prom Mês Operada", op),
         _kpi("PDT Plan", pdt_last),
-        _kpi("Var vs PDT", var, good=(var >= 0 if var is not None else None)),
+        _kpi("Var vs PDT", var, red_if_negative=True),
     ])
 
     # Failures panel — last 5 days with falhas
