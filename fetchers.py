@@ -61,8 +61,6 @@ OFAC_FEEDS = [
 
 # Curated upcoming O&G industry conferences
 STATIC_EVENTS = [
-    {"name": "IES — International Energy Summit", "date": "2–4 Jun 2026", "location": "New Orleans, LA – EUA", "url": "https://www.aien.org"},
-    {"name": "EAGE Annual Conference & Exhibition", "date": "8–11 Jun 2026", "location": "Aberdeen – Reino Unido", "url": "https://eageannual.org"},
     {"name": "IADC World Drilling Conference", "date": "16–17 Jun 2026", "location": "Estoril – Portugal", "url": "https://www.iadc.org"},
     {"name": "URTeC — Unconventional Resources Technology Conf.", "date": "22–24 Jun 2026", "location": "Houston, TX – EUA", "url": "https://urtec.org"},
     {"name": "Sergipe O&G (SOG26)", "date": "29–31 Jul 2026", "location": "Aracaju, SE – Brasil", "url": "https://sergipeoilgas.com.br"},
@@ -74,6 +72,7 @@ STATIC_EVENTS = [
     {"name": "ROG.e — Rio Oil & Gas", "date": "21–24 Set 2026", "location": "Rio de Janeiro, RJ – Brasil", "url": "https://roge.energy"},
     {"name": "WPC Energy Congress", "date": "11–15 Out 2026", "location": "Riade – Arábia Saudita", "url": "https://wpcenergy2026.org"},
     {"name": "SPE ATCE — Annual Technical Conference & Exhibition", "date": "21–23 Out 2026", "location": "Houston, TX – EUA", "url": "https://www.atce.org"},
+    {"name": "Venezuela Energy Week", "date": "26–29 Out 2026", "location": "Caracas – Venezuela", "url": "http://venezuelaenergyweek.com/"},
     {"name": "ADIPEC — Abu Dhabi International Petroleum Exhib. & Conf.", "date": "2–5 Nov 2026", "location": "Abu Dhabi – Emirados Árabes", "url": "https://www.adipec.com"},
     {"name": "OEEC — Offshore Energy Exhibition & Conference", "date": "24–25 Nov 2026", "location": "Amsterdã – Países Baixos", "url": "https://oeec.biz"},
     {"name": "ERTC — European Refining Technology Conference", "date": "30 Nov–3 Dez 2026", "location": "Madri – Espanha", "url": "https://www.ertc.com"},
