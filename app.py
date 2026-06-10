@@ -181,14 +181,21 @@ app.layout = dbc.Container(
                         className="p-1",
                     ),
                 ], className="h-100 shadow-sm"),
-                md=8, className="mb-3",
+                md=6, className="mb-3",
             ),
             dbc.Col(
                 dbc.Card([
-                    dbc.CardHeader([html.Span("📊  ", className="me-1"), html.Strong("KPIs do Período")], className="py-2"),
+                    dbc.CardHeader([html.Span("📈  ", className="me-1"), html.Strong("KPIs do Período")], className="py-2"),
+                    dbc.CardBody(dcc.Loading(html.Div(id="prod-kpis-periodo"), type="circle", color="#0dcaf0"), className="p-2"),
+                ], className="h-100 shadow-sm"),
+                md=3, className="mb-3",
+            ),
+            dbc.Col(
+                dbc.Card([
+                    dbc.CardHeader([html.Span("📊  ", className="me-1"), html.Strong("KPIs do Mês")], className="py-2"),
                     dbc.CardBody(dcc.Loading(html.Div(id="prod-kpis"), type="circle", color="#0dcaf0"), className="p-2"),
                 ], className="h-100 shadow-sm"),
-                md=4, className="mb-3",
+                md=3, className="mb-3",
             ),
         ]),
 
@@ -370,6 +377,7 @@ def init_date_range(_, current_start, current_end):
 
 @app.callback(
     Output("prod-chart", "figure"),
+    Output("prod-kpis-periodo", "children"),
     Output("prod-kpis", "children"),
     Output("prod-falhas", "children"),
     Input("interval", "n_intervals"),
@@ -397,6 +405,7 @@ def update_producao(_, start_date, end_date):
     if not rows:
         return (
             empty_fig,
+            html.P("Sem dados de produção ainda.", className="text-muted small"),
             html.P("Sem dados de produção ainda.", className="text-muted small"),
             html.P("Sem falhas registradas.", className="text-muted small"),
         )
@@ -473,6 +482,21 @@ def update_producao(_, start_date, end_date):
         _kpi("Var vs PDT", var, red_if_negative=True),
     ])
 
+    # KPIs do Período (aggregated over selected range)
+    pn_vals  = [r.get("pn_bls")  for r in rows if r.get("pn_bls")  is not None]
+    pdt_vals = [r.get("pdt_plan") for r in rows if r.get("pdt_plan") is not None]
+    prod_acum   = sum(pn_vals) if pn_vals else None
+    prom_period = round(sum(pn_vals) / len(pn_vals)) if pn_vals else None
+    pdt_medio   = round(sum(pdt_vals) / len(pdt_vals)) if pdt_vals else None
+    var_period  = (prom_period - pdt_medio) if (prom_period is not None and pdt_medio is not None) else None
+
+    kpis_periodo = html.Div([
+        _kpi("Prod. Acum.", prod_acum),
+        _kpi("Prom. Período", prom_period),
+        _kpi("Prod PDT Plan", pdt_medio),
+        _kpi("Var vs PDT", var_period, red_if_negative=True),
+    ])
+
     # Failures panel — last 5 days with falhas
     falha_rows = [r for r in reversed(rows) if r.get("falhas")][:5]
     if not falha_rows:
@@ -487,7 +511,7 @@ def update_producao(_, start_date, end_date):
             ], style={"borderLeft": "3px solid #fd7e14", "paddingLeft": "8px", "marginBottom": "10px"}))
         falhas_div = html.Div(items)
 
-    return fig, kpis, falhas_div
+    return fig, kpis_periodo, kpis, falhas_div
 
 
 # ---------------------------------------------------------------------------
