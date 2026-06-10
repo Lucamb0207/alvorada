@@ -363,8 +363,8 @@ def init_date_range(_, current_start, current_end):
     min_d = min(dates)
     max_d = max(dates)
     # Only set start/end on first load (when they are None)
-    start = current_start or min_d.strftime("%Y-%m-%d")
     end   = current_end   or max_d.strftime("%Y-%m-%d")
+    start = current_start or max_d.replace(day=1).strftime("%Y-%m-%d")
     return min_d.strftime("%Y-%m-%d"), max_d.strftime("%Y-%m-%d"), start, end
 
 
