@@ -1,5 +1,5 @@
 import dash
-from dash import dcc, html, Input, Output
+from dash import dcc, html, Input, Output, State
 import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 from datetime import datetime
@@ -158,6 +158,22 @@ app.layout = dbc.Container(
         html.Hr(style={"borderColor": "#2a2d3a", "margin": "8px 0"}),
         dbc.Row([
             dbc.Col(
+                html.Div([
+                    html.Span("Período: ", className="text-muted me-2", style={"fontSize": "0.80rem", "verticalAlign": "middle"}),
+                    dcc.DatePickerRange(
+                        id="prod-date-range",
+                        display_format="DD/MM/YYYY",
+                        start_date_placeholder_text="Data inicial",
+                        end_date_placeholder_text="Data final",
+                        style={"fontSize": "0.80rem"},
+                        className="mb-0",
+                    ),
+                ], className="d-flex align-items-center mb-2"),
+                md=12,
+            ),
+        ]),
+        dbc.Row([
+            dbc.Col(
                 dbc.Card([
                     dbc.CardHeader([html.Span("🛢️  ", className="me-1"), html.Strong("Produção Diária — GED-14 (bls)")], className="py-2"),
                     dbc.CardBody(
@@ -169,7 +185,7 @@ app.layout = dbc.Container(
             ),
             dbc.Col(
                 dbc.Card([
-                    dbc.CardHeader([html.Span("📊  ", className="me-1"), html.Strong("KPIs do Mês")], className="py-2"),
+                    dbc.CardHeader([html.Span("📊  ", className="me-1"), html.Strong("KPIs do Período")], className="py-2"),
                     dbc.CardBody(dcc.Loading(html.Div(id="prod-kpis"), type="circle", color="#0dcaf0"), className="p-2"),
                 ], className="h-100 shadow-sm"),
                 md=4, className="mb-3",
@@ -331,13 +347,48 @@ def update_ofac(_):
 
 
 @app.callback(
+    Output("prod-date-range", "min_date_allowed"),
+    Output("prod-date-range", "max_date_allowed"),
+    Output("prod-date-range", "start_date"),
+    Output("prod-date-range", "end_date"),
+    Input("interval", "n_intervals"),
+    State("prod-date-range", "start_date"),
+    State("prod-date-range", "end_date"),
+)
+def init_date_range(_, current_start, current_end):
+    rows = fetchers.fetch_producao(days=365)
+    if not rows:
+        return None, None, None, None
+    dates = [r["fecha"] for r in rows if r.get("fecha")]
+    min_d = min(dates)
+    max_d = max(dates)
+    # Only set start/end on first load (when they are None)
+    start = current_start or min_d.strftime("%Y-%m-%d")
+    end   = current_end   or max_d.strftime("%Y-%m-%d")
+    return min_d.strftime("%Y-%m-%d"), max_d.strftime("%Y-%m-%d"), start, end
+
+
+@app.callback(
     Output("prod-chart", "figure"),
     Output("prod-kpis", "children"),
     Output("prod-falhas", "children"),
     Input("interval", "n_intervals"),
+    Input("prod-date-range", "start_date"),
+    Input("prod-date-range", "end_date"),
 )
-def update_producao(_):
-    rows = fetchers.fetch_producao(days=60)
+def update_producao(_, start_date, end_date):
+    rows = fetchers.fetch_producao(days=365)
+
+    if rows and start_date:
+        start_d = datetime.strptime(start_date[:10], "%Y-%m-%d").date()
+        rows = [r for r in rows if r.get("fecha") and (
+            r["fecha"].date() if hasattr(r["fecha"], "date") else r["fecha"]
+        ) >= start_d]
+    if rows and end_date:
+        end_d = datetime.strptime(end_date[:10], "%Y-%m-%d").date()
+        rows = [r for r in rows if r.get("fecha") and (
+            r["fecha"].date() if hasattr(r["fecha"], "date") else r["fecha"]
+        ) <= end_d]
 
     empty_fig = go.Figure()
     empty_fig.add_annotation(text="Sem dados — rode parse_report.py para alimentar", x=0.5, y=0.5, showarrow=False, font=dict(color="#888", size=12))
