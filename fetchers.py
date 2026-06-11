@@ -9,20 +9,19 @@ from datetime import datetime, timezone
 # ---------------------------------------------------------------------------
 
 VENEZUELA_FEEDS = [
-    "https://news.google.com/rss/search?q=venezuela&hl=pt-BR&gl=BR&ceid=BR:pt-419",
-    "https://efectococuyo.com/feed/",
-    "https://talcualdigital.com/feed/",
-    "https://venezuelanalysis.com/feed",
-    "https://prodavinci.com/feed",
-    "https://runrun.es/feed",
-    "https://www.elnacional.com/feed",
-    "https://dialogo-americas.com/feed/",
-    "https://www.infobae.com/arc/outboundfeeds/rss/",
-    "https://www.noticierodigital.com.ar/categoria/judiciales/feed/",
-    "https://www.noticierodigital.com.ar/categoria/sociales/feed/",
-    "https://www.noticierodigital.com.ar/categoria/sociedad/feed/",
-    "http://feeds.bbci.co.uk/news/world/latin_america/rss.xml",
-    "https://bastidoresdopoder.com.br/feed/",
+    "https://www.elnacional.com/venezuela/politica/feed/",
+    "https://www.elnacional.com/economia/feed/",
+    "https://www.elnacional.com/economia/petroleo/feed/",
+    "https://www.analitica.com/category/economia/feed/",
+    "https://www.analitica.com/category/politica/feed/",
+    "https://correodelcaroni.com/categoria/laboral-economia/feed/",
+    "https://correodelcaroni.com/categoria/pais-politico/feed/",
+    "https://www.elimpulso.com/category/noticias/economia/feed/",
+    "https://www.caracaschronicles.com/category/economy/feed/",
+    "https://www.caracaschronicles.com/category/politics/feed/",
+    "https://ultimasnoticias.com.ve/seccion/politica/feed/",
+    "https://ultimasnoticias.com.ve/seccion/economia/feed/",
+    "https://ultimasnoticias.com.ve/seccion/economia/petroleo/feed/",
 ]
 
 GLOBAL_FEEDS = [
